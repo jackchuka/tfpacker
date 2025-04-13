@@ -1,0 +1,34 @@
+rules:
+  # Group all database-related resources by name regex, regardless of type
+  - name_regex: "^db_.*|.*_db$"
+    ignore_type: true
+    output_file: "database.tf"
+
+  # Group all API-related resources by name regex with specific type
+  - match_type: "resource"
+    name_regex: "^api_.*"
+    output_file: "api.tf"
+
+  # Group all Lambda-related resources
+  - match_type: "resource"
+    sub_type: "aws_lambda_function"
+    output_file: "lambda.tf"
+
+  # Group all IAM roles
+  - match_type: "resource"
+    sub_type: "aws_iam_role"
+    output_file: "iam.tf"
+
+  # Default groupings
+  - match_type: "resource"
+    output_file: "storage.tf"
+  - match_type: "data"
+    output_file: "data.tf"
+  - match_type: "module"
+    output_file: "modules.tf"
+  - match_type: "output"
+    output_file: "outputs.tf"
+  - match_type: "locals"
+    output_file: "locals.tf"
+  - match_type: "provider"
+    output_file: "providers.tf"

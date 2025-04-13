@@ -1,0 +1,28 @@
+rules:
+  # Group all production resources by name prefix, regardless of type
+  - name_regex: "^prod_.*"
+    ignore_type: true
+    output_file: "production.tf"
+
+  # Group all staging resources by name prefix, regardless of type
+  - name_regex: "^staging_.*"
+    ignore_type: true
+    output_file: "staging.tf"
+
+  # Group all development resources by name prefix, regardless of type
+  - name_regex: "^dev_.*"
+    ignore_type: true
+    output_file: "development.tf"
+
+  # Group remaining resources by type
+  - match_type: "resource"
+    sub_type: "aws_iam_role"
+    output_file: "iam.tf"
+  - match_type: "module"
+    output_file: "modules.tf"
+  - match_type: "data"
+    output_file: "data.tf"
+  - match_type: "locals"
+    output_file: "locals.tf"
+  - match_type: "provider"
+    output_file: "providers.tf"

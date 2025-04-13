@@ -1,0 +1,41 @@
+rules:
+  # Traditional type-based matching
+  - match_type: "resource"
+    sub_type: "aws_s3_bucket"
+    output_file: "storage.tf"
+  - match_type: "resource"
+    sub_type: "aws_iam_role"
+    output_file: "iam.tf"
+  - match_type: "data"
+    sub_type: "aws_region"
+    output_file: "data.tf"
+
+  # Name prefix matching (traditional)
+  - match_type: "variable"
+    name_prefix: "db_"
+    output_file: "database.tf"
+
+  # Group all database-related resources by name regex, regardless of type
+  - name_regex: "^db_.*|.*_database$"
+    ignore_type: true
+    output_file: "all_database.tf"
+
+  # Group all IAM-related resources by name regex, regardless of type
+  - name_regex: "^iam_.*|.*_role$"
+    ignore_type: true
+    output_file: "all_iam.tf"
+
+  # Regex matching with specific type
+  - match_type: "resource"
+    name_regex: "^api_.*"
+    output_file: "api_resources.tf"
+
+  # Default groupings
+  - match_type: "module"
+    output_file: "modules.tf"
+  - match_type: "output"
+    output_file: "outputs.tf"
+  - match_type: "locals"
+    output_file: "locals.tf"
+  - match_type: "provider"
+    output_file: "providers.tf"

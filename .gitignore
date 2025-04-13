@@ -1,0 +1,18 @@
+
+# Build artifacts
+/build
+
+# Test artifacts
+/test_run
+*.tf.bak
+internal/*.tf
+
+# Go artifacts
+/vendor
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
