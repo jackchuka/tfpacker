@@ -62,5 +62,5 @@ func (l *Logger) log(level Level, format string, args ...any) {
 	}
 	timestamp := time.Now().Format("15:04:05")
 	message := fmt.Sprintf(format, args...)
-	fmt.Fprintf(l.out, "%s %s %s\n", timestamp, prefix, message)
+	_, _ = fmt.Fprintf(l.out, "%s %s %s\n", timestamp, prefix, message)
 }
