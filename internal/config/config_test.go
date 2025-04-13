@@ -205,7 +205,7 @@ func TestMatchRule(t *testing.T) {
 			matchType: "module",
 			subType:   "",
 			blockName: "vpc",
-			want:      "module.tf",
+			want:      "modules.tf",
 		},
 		{
 			name:      "Default variable grouping",
