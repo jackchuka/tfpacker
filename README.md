@@ -1,4 +1,5 @@
 # tfpacker
+[![CI](https://github.com/jackchuka/tfpacker/actions/workflows/ci.yml/badge.svg)](https://github.com/jackchuka/tfpacker/actions/workflows/ci.yml)
 
 ![logo](./assets/image.png)
 
