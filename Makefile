@@ -2,9 +2,17 @@
 
 # Build variables
 BINARY_NAME=tfpacker
-VERSION=$(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 BUILD_DIR=build
-LDFLAGS=-ldflags "-X main.version=$(VERSION)"
+
+# Version information
+VERSION ?= dev
+COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+DATE := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+# Build flags
+LDFLAGS := -X 'github.com/jackchuka/tfpacker/internal/version.Version=$(VERSION)'
+LDFLAGS += -X 'github.com/jackchuka/tfpacker/internal/version.Commit=$(COMMIT)'
+LDFLAGS += -X 'github.com/jackchuka/tfpacker/internal/version.Date=$(DATE)'
 
 # Default target
 all: build
@@ -13,12 +21,12 @@ all: build
 build:
 	@echo "Building $(BINARY_NAME)..."
 	@mkdir -p $(BUILD_DIR)
-	@go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME) .
+	@go build -ldflags "$(LDFLAGS)" -o $(BUILD_DIR)/$(BINARY_NAME) .
 
 # Install the application
 install:
 	@echo "Installing $(BINARY_NAME)..."
-	@go install $(LDFLAGS) .
+	@go install -ldflags "$(LDFLAGS)" .
 
 # Run tests
 test:

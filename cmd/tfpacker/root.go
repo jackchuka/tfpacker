@@ -5,15 +5,12 @@ import (
 	"os"
 	"strings"
 
+	"github.com/jackchuka/tfpacker/cmd/tfpacker/commands"
 	"github.com/jackchuka/tfpacker/internal/config"
 	"github.com/jackchuka/tfpacker/internal/logger"
 	"github.com/jackchuka/tfpacker/internal/parser"
 	"github.com/jackchuka/tfpacker/internal/writer"
 	"github.com/spf13/cobra"
-)
-
-const (
-	version = "0.2.0"
 )
 
 var (
@@ -31,11 +28,10 @@ func Eexecute() error {
 }
 
 var rootCmd = &cobra.Command{
-	Use:     "tfpacker [directory]",
-	Short:   "Organize Terraform resources into separate files",
-	Long:    `tfpacker is a CLI utility that organizes Terraform resources into separate files based on customizable rules.`,
-	Version: version,
-	Args:    cobra.MaximumNArgs(1),
+	Use:   "tfpacker [directory]",
+	Short: "Organize Terraform resources into separate files",
+	Long:  `tfpacker is a CLI utility that organizes Terraform resources into separate files based on customizable rules.`,
+	Args:  cobra.MaximumNArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if excludePatterns != "" {
 			excludes = strings.Split(excludePatterns, ",")
@@ -57,6 +53,8 @@ func init() {
 	rootCmd.Flags().BoolVar(&verbose, "verbose", false, "Enable detailed logging")
 	rootCmd.Flags().StringVar(&excludePatterns, "exclude", "", "Patterns to exclude from processing (comma-separated)")
 	rootCmd.Flags().StringVar(&outputDir, "output", "output", "Directory to write output files to")
+
+	rootCmd.AddCommand(commands.NewVersionCommand())
 }
 
 func run(

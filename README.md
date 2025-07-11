@@ -36,13 +36,18 @@ tfpacker [options] [./your-tf-directory]
 
 If no directory is provided, `tfpacker` defaults to the current directory.
 
+### Check version
+```bash
+tfpacker version
+```
+
 ### Options
 
 - `--config` - Path to config file (default: tfpacker.config.yaml)
 - `--dry-run` - Show what would be done without making changes
 - `--verbose` - Enable detailed logging
 - `--exclude` - Patterns to exclude from processing (comma-separated)
-- `--version` - Show version information
+- `version` - Show version information
 
 ## Configuration
 
