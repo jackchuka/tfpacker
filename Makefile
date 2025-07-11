@@ -13,12 +13,12 @@ all: build
 build:
 	@echo "Building $(BINARY_NAME)..."
 	@mkdir -p $(BUILD_DIR)
-	@go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME) ./cmd/tfpacker
+	@go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME) .
 
 # Install the application
 install:
 	@echo "Installing $(BINARY_NAME)..."
-	@go install $(LDFLAGS) ./cmd/tfpacker
+	@go install $(LDFLAGS) .
 
 # Run tests
 test:
