@@ -1,6 +1,6 @@
 module github.com/jackchuka/tfpacker
 
-go 1.24.2
+go 1.26.1
 
 require (
 	github.com/hashicorp/hcl/v2 v2.24.0
