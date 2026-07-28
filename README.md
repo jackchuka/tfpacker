@@ -1,6 +1,6 @@
 # tfpacker
 
-[![CI](https://github.com/jackchuka/tfpacker/actions/workflows/ci.yml/badge.svg)](https://github.com/jackchuka/tfpacker/actions/workflows/ci.yml)
+[![Test](https://github.com/jackchuka/tfpacker/actions/workflows/test.yml/badge.svg)](https://github.com/jackchuka/tfpacker/actions/workflows/test.yml)
 [![Release](https://img.shields.io/github/v/release/jackchuka/tfpacker?sort=semver)](https://github.com/jackchuka/tfpacker/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
