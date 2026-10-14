@@ -1,3 +1,4 @@
+// Production resources
 resource "aws_s3_bucket" "prod_logs" {
   bucket = "prod-logs-bucket"
 }

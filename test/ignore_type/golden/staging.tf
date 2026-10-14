@@ -1,3 +1,4 @@
+// Staging resources
 resource "aws_s3_bucket" "staging_logs" {
   bucket = "staging-logs-bucket"
 }

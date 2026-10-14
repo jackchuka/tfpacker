@@ -1,3 +1,4 @@
+// Resources with db_ prefix
 resource "aws_rds_instance" "db_main" {
   name     = "main-database"
   instance = "db.t3.micro"
@@ -10,6 +11,7 @@ resource "aws_dynamodb_table" "db_users" {
   hash_key     = "id"
 }
 
+// Resources with _db suffix
 resource "aws_security_group" "postgres_db" {
   name        = "allow_postgres"
   description = "Allow PostgreSQL inbound traffic"
@@ -32,6 +34,7 @@ resource "aws_iam_role" "rds_db" {
   })
 }
 
+// Variables with db_ prefix
 variable "db_username" {
   type      = string
   sensitive = true
@@ -42,11 +45,13 @@ variable "db_password" {
   sensitive = true
 }
 
+// Variable with _db suffix
 variable "postgres_db" {
   type    = string
   default = "main"
 }
 
+// Outputs
 output "db_endpoint" {
   value = aws_rds_instance.db_main.endpoint
 }

@@ -1,3 +1,4 @@
+// comment
 resource "aws_iam_role" "role1" {
   name = "test-role"
 
