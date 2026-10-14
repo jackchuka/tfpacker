@@ -2,8 +2,10 @@ package writer
 
 import (
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 
 	"github.com/jackchuka/tfpacker/internal/config"
 	"github.com/jackchuka/tfpacker/internal/logger"
@@ -41,7 +43,8 @@ func (w *Writer) WriteBlocks(blocks []parser.BlockInfo) (map[string]int, error) 
 
 	w.log.Debug("WriteBlocks: Writing to %d files", len(fileBlocksRaw))
 
-	for filename, blocks := range fileBlocksRaw {
+	for _, filename := range slices.Sorted(maps.Keys(fileBlocksRaw)) {
+		blocks := fileBlocksRaw[filename]
 		if w.dryRun {
 			w.log.Info("[DRY RUN] Would write %s (%d blocks)", filename, len(blocks))
 			continue
@@ -82,6 +85,7 @@ func (w *Writer) writeRawFile(filename string, blocks [][]byte) error {
 		}
 		content = append(content, block...)
 	}
+	content = append(content, '\n')
 
 	w.log.Debug("writeRawFile: File content length: %d bytes", len(content))
 
@@ -101,7 +105,8 @@ func (w *Writer) GenerateSummary(fileBlockCount map[string]int) string {
 	totalFiles := len(fileBlockCount)
 	totalBlocks := 0
 
-	for file, count := range fileBlockCount {
+	for _, file := range slices.Sorted(maps.Keys(fileBlockCount)) {
+		count := fileBlockCount[file]
 		totalBlocks += count
 		summary += fmt.Sprintf("  - %s: %d blocks\n", file, count)
 	}

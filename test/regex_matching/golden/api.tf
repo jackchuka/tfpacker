@@ -1,3 +1,4 @@
+// Resources with api_ prefix
 resource "aws_api_gateway_rest_api" "api_main" {
   name        = "main-api"
   description = "Main API Gateway"

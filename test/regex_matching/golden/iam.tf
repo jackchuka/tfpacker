@@ -1,3 +1,4 @@
+// Lambda execution role
 resource "aws_iam_role" "lambda_role" {
   name = "lambda-execution-role"
   

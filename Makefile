@@ -61,12 +61,12 @@ clean:
 # Run the application
 run:
 	@echo "Running $(BINARY_NAME)..."
-	@go run ./cmd/tfpacker $(ARGS)
+	@go run -ldflags "$(LDFLAGS)" . $(ARGS)
 
 # Run with dry-run mode
 dry-run:
 	@echo "Running in dry-run mode..."
-	@go run ./cmd/tfpacker --dry-run $(ARGS)
+	@go run -ldflags "$(LDFLAGS)" . --dry-run $(ARGS)
 
 # Show help
 help:

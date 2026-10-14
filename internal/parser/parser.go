@@ -1,14 +1,15 @@
 package parser
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/hclparse"
-	tfschema "github.com/hashicorp/terraform-schema/schema"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/jackchuka/tfpacker/internal/logger"
 )
 
@@ -22,14 +23,12 @@ type BlockInfo struct {
 }
 
 type Parser struct {
-	parser   *hclparse.Parser
 	excludes []string
 	log      *logger.Logger
 }
 
 func NewParser(excludes []string, log *logger.Logger) *Parser {
 	return &Parser{
-		parser:   hclparse.NewParser(),
 		excludes: excludes,
 		log:      log,
 	}
@@ -86,22 +85,13 @@ func (p *Parser) ParseFile(path string) ([]BlockInfo, error) {
 		return nil, fmt.Errorf("failed to read file %s: %w", path, err)
 	}
 
-	file, diag := p.parser.ParseHCL(src, path)
-	if diag.HasErrors() {
-		return nil, fmt.Errorf("error parsing %s: %s", path, diag.Error())
+	file, diags := hclsyntax.ParseConfig(src, path, hcl.InitialPos)
+	if diags.HasErrors() {
+		return nil, fmt.Errorf("error parsing %s: %s", path, diags.Error())
 	}
+	tokens, _ := hclsyntax.LexConfig(src, path, hcl.InitialPos)
 
-	sourceContent := src
-
-	schema, err := tfschema.CoreModuleSchemaForVersion(tfschema.LatestAvailableVersion)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get schema: %w", err)
-	}
-	body, diag := file.Body.Content(schema.ToHCLSchema())
-	if diag.HasErrors() {
-		p.log.Error("Error getting content from %s: %s", path, diag.Error())
-	}
-
+	body := file.Body.(*hclsyntax.Body)
 	p.log.Debug("Found %d blocks in %s", len(body.Blocks), path)
 
 	for _, block := range body.Blocks {
@@ -112,19 +102,12 @@ func (p *Parser) ParseFile(path string) ([]BlockInfo, error) {
 			continue
 		}
 
-		// Extract the block content using the extractBlockContent function
-		content, err := extractBlockContent(sourceContent, block)
-		if err != nil {
-			p.log.Error("Failed to extract block content: %v", err)
-			continue
-		}
-
 		blocks = append(blocks, BlockInfo{
 			Type:       blockType,
 			SubType:    subType,
 			Name:       name,
 			SourceFile: path,
-			Content:    content,
+			Content:    extractBlockContent(src, tokens, block.Range()),
 		})
 
 		p.log.Debug("Added block: %s %s %s", blockType, subType, name)
@@ -133,49 +116,51 @@ func (p *Parser) ParseFile(path string) ([]BlockInfo, error) {
 	return blocks, nil
 }
 
-func extractBlockContent(sourceContent []byte, block *hcl.Block) ([]byte, error) {
-	startPos := block.DefRange.Start
-	startOffset := startPos.Byte
+// extractBlockContent returns the source of the block in rng, extended to
+// include the comments directly above it and a comment trailing its closing brace.
+func extractBlockContent(src []byte, tokens hclsyntax.Tokens, rng hcl.Range) []byte {
+	first := sort.Search(len(tokens), func(i int) bool { return tokens[i].Range.Start.Byte >= rng.Start.Byte })
+	next := sort.Search(len(tokens), func(i int) bool { return tokens[i].Range.Start.Byte >= rng.End.Byte })
 
-	if startOffset < 0 || startOffset >= len(sourceContent) {
-		return nil, fmt.Errorf("invalid start offset: %d", startOffset)
-	}
-
-	openBracePos := -1
-	for i := startOffset; i < len(sourceContent); i++ {
-		if sourceContent[i] == '{' {
-			openBracePos = i
+	start := rng.Start.Byte
+	for i := first - 1; i >= 0; i-- {
+		if tokens[i].Type == hclsyntax.TokenNewline && i > 0 && isBlockComment(tokens[i-1]) {
+			i--
+		}
+		tok := tokens[i]
+		if tok.Type != hclsyntax.TokenComment || !startsLine(src, tok.Range.Start.Byte) {
 			break
 		}
+		start = tok.Range.Start.Byte
 	}
 
-	if openBracePos == -1 {
-		return nil, fmt.Errorf("opening brace not found")
+	end := rng.End.Byte
+	if next < len(tokens) && tokens[next].Type == hclsyntax.TokenComment && tokens[next].Range.Start.Line == rng.End.Line {
+		end = tokens[next].Range.End.Byte
 	}
 
-	braceCount := 1
-	endOffset := -1
-
-	for i := openBracePos + 1; i < len(sourceContent); i++ {
-		if sourceContent[i] == '{' {
-			braceCount++
-		} else if sourceContent[i] == '}' {
-			braceCount--
-			if braceCount == 0 {
-				endOffset = i + 1
-				break
-			}
-		}
-	}
-
-	if endOffset == -1 {
-		return nil, fmt.Errorf("closing brace not found")
-	}
-
-	return sourceContent[startOffset:endOffset], nil
+	return bytes.TrimRight(src[start:end], "\r\n")
 }
 
-func (p *Parser) processBlock(block *hcl.Block) (string, string, string) {
+func isBlockComment(tok hclsyntax.Token) bool {
+	return tok.Type == hclsyntax.TokenComment && bytes.HasPrefix(tok.Bytes, []byte("/*"))
+}
+
+func startsLine(src []byte, offset int) bool {
+	for i := offset - 1; i >= 0; i-- {
+		switch src[i] {
+		case ' ', '\t':
+			continue
+		case '\n':
+			return true
+		default:
+			return false
+		}
+	}
+	return true
+}
+
+func (p *Parser) processBlock(block *hclsyntax.Block) (string, string, string) {
 	labels := block.Labels
 	var subType, name string
 
