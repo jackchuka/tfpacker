@@ -1,0 +1,12 @@
+rules:
+  - name_regex: "^db_|_db$"
+    ignore_type: true
+    output_file: "database.tf"
+  - match_type: "resource"
+    sub_type: "aws_s3_bucket"
+    output_file: "storage.tf"
+  - match_type: "resource"
+    name_regex: "_(role|policy)$"
+    output_file: "iam.tf"
+  - match_type: "module"
+    output_file: "network.tf"
